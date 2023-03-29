@@ -8,42 +8,37 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> mapEventToState(HomeEvent homeEvent, Emitter<HomeState> emit) async {
-    switch (homeEvent.runtimeType) {
-      case HomeFetchList:
-        emit(await _fetchList());
-        break;
-      case HomeFetchListWithError:
-        emit(await _fetchListWithError());
-        break;
+    if (homeEvent is HomeFetchList) {
+      emit(await _fetchList());
+    }
+    if (homeEvent is HomeFetchListWithError) {
+      emit(await _fetchListWithError());
+    }
+    if (homeEvent is HomeEventAddItem) {
+      emit(_addItem(homeEvent));
     }
   }
 
-  Future<HomeState> _fetchList() async {
-    List<String> list = await Future.delayed(
-        const Duration(seconds: 3),
-        () => <String>[
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-              'Item 1',
-            ]);
+  HomeState _addItem(HomeEventAddItem homeEventAddItem) {
+    List<String> list = List.from(homeEventAddItem.state.list);
+    list.add(homeEventAddItem.descricaoItem);
     return HomeStateLoaded(list: list);
+  }
+
+  Future<HomeState> _fetchList() async {
+    try {
+      List<String> list = await Future.delayed(
+          const Duration(seconds: 3),
+          () => <String>[
+                'Item 1',
+                'Item 1',
+                'Item 1',
+                'Item 1',
+              ]);
+      return HomeStateLoaded(list: list);
+    } catch (e) {
+      return HomeErrorState(message: 'Erro ao carregar a lista');
+    }
   }
 
   Future<HomeState> _fetchListWithError() async {
